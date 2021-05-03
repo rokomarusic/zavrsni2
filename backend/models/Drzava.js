@@ -25,6 +25,19 @@ module.exports = class Drzava{
         }
     }
 
+    static async dohvatiDrzavuZaId(idtim){
+        const sql = `SELECT * FROM  drzava NATURAL JOIN tim WHERE idtim=$1` 
+        const values = [idtim];
+        try {
+            const result = await db.query(sql, values);
+            let drzava = new Drzava(result.rows[0]);
+            return drzava;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
     static async dodajDrzavu(nazivdrzava, fifakod){
         const sql1 = `INSERT INTO tim(nazivtim) VALUES ($1);`
         const sql2 = `SELECT MAX(idtim) FROM tim WHERE nazivtim = $1;`
@@ -54,10 +67,31 @@ module.exports = class Drzava{
     }
 
     static async ukloniDrzavu(idtim){
+        console.log("UNUTAR UKLONI DRZAVU")
         const sql = `DELETE FROM tim WHERE idtim = $1` 
         const values = [idtim];
         try {
             await db.query(sql, values);
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async izmjeniDrzavu(idtim, nazivtim, fifakod){
+        console.log("UNUTAR IZMJENI DRZAVU")
+        const sql1 = `UPDATE tim SET nazivtim = $2 WHERE idtim = $1` 
+        const values1 = [idtim, nazivtim];
+        const sql2 = `update drzava set fifakod = $2 WHERE idtim = $1` 
+        const values2 = [idtim, fifakod];
+        try {
+            if(nazivtim){
+                await db.query(sql1, values1);
+            }
+            if(fifakod){
+                await db.query(sql2, values2);
+            }
+            
         } catch (err) {
             console.log(err);
             throw err

@@ -24,6 +24,19 @@ module.exports = class Grad{
         }
     }
 
+    static async dohvatiGradZaId(idgrad){
+        const sql = `SELECT * FROM grad WHERE idgrad=$1` 
+        const values = [idgrad];
+        try {
+            const result = await db.query(sql, values);
+            let grad = new Grad(result.rows[0])
+            return grad;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
     static async dodajGrad(nazivgrad, iddrzava){
         const sql = `INSERT INTO grad(nazivgrad, iddrzava) VALUES($1, $2);` 
         const values = [nazivgrad, iddrzava];
@@ -39,7 +52,9 @@ module.exports = class Grad{
         const sql = `UPDATE grad SET nazivgrad=$1 WHERE idgrad=$2;` 
         const values = [novinazivgrad, idgrad];
         try {
-            await db.query(sql, values);
+            if(novinazivgrad){
+                await db.query(sql, values);
+            }
         } catch (err) {
             console.log(err);
             throw err
