@@ -9,6 +9,7 @@ module.exports = class Klub{
         this.nazivtim = dbKlub.nazivtim
         this.idgrad = dbKlub.idgrad
         this.nazivgrad = dbKlub.nazivgrad
+        this.iddrzava = dbKlub.iddrzava
     }
 
     static async dohvatiKluboveUDrzavi(iddrzava){
@@ -44,11 +45,52 @@ module.exports = class Klub{
         }
     }
 
-    static async ukloniKlub(idtim){
+    static async ukloniKlub(idtim, nazivtim, godinaosnutka, idgrad){
         const sql = `DELETE FROM tim WHERE idtim = $1` 
         const values = [idtim];
         try {
             await db.query(sql, values);
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiKlubZaId(idtim){
+        const sql = `SELECT klub.*, grad.*, tim.nazivtim FROM klub NATURAL JOIN tim NATURAL JOIN grad JOIN DRZAVA 
+        ON grad.iddrzava = drzava.iddrzava WHERE tim.idtim=$1` 
+        const values = [idtim];
+        try {
+            let result = await db.query(sql, values);
+            return result.rows[0];
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async izmjeniKlub(idtim, nazivtim, godinaosnutka, idgrad){
+        console.log("UNUTAR IZMJENI KLUB")
+        console.log(idtim, nazivtim, godinaosnutka, idgrad)
+        const sql1 = `UPDATE tim SET nazivtim = $2 WHERE idtim = $1` 
+        const values1 = [idtim, nazivtim];
+        const sql2 = `UPDATE klub set godinaosnutka = $1 where idtim = $2` 
+        const values2 = [godinaosnutka, idtim];
+        const sql3 = `UPDATE klub set idgrad = $1 where idtim = $2` 
+        const values3 = [idgrad, idtim];
+        try {
+            if(nazivtim.trim()){
+                await db.query(sql1, values1);
+            }
+
+            if(godinaosnutka.trim()){
+                await db.query(sql2, values2);
+            }
+
+            if(idgrad){
+                await db.query(sql3, values3)
+            }
+            
         } catch (err) {
             console.log(err);
             throw err
