@@ -61,4 +61,41 @@ module.exports = class Natjecanje{
             return null;
         }
     }
+
+    static async dohvatiKluboveUNatjecanju(idnatjecanje){
+        const sql = `select tim.* FROM Sudjeluje_u_natjecanju NATURAL JOIN 
+        tim NATURAL JOIN natjecanje WHERE idnatjecanje = $1 ORDER BY tim.nazivtim` 
+        const values = [idnatjecanje];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async ukloniSudionika(idtim, idnatjecanje){
+        const sql = `DELETE FROM Sudjeluje_u_natjecanju WHERE idtim = $1 AND idnatjecanje= $2` 
+        const values = [idtim, idnatjecanje];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dodajSudionika(idtim, idnatjecanje){
+        const sql = `INSERT INTO Sudjeluje_u_natjecanju(idtim, idnatjecanje) VALUES($1, $2)` 
+        const values = [idtim, idnatjecanje];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
 }

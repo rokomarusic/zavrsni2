@@ -123,7 +123,12 @@ router.get('/natjecanje/:id', async(req, res, next) => {
 })
 
 router.get('/drzava/klubovi/:id', async(req, res) => {
-    let data = await Klub.dohvatiKluboveUDrzavi(req.params.id)
+    let data = {}
+    if(req.params.id > 0){
+        data = await Klub.dohvatiKluboveUDrzavi(req.params.id)
+    }else{
+        data = await Klub.dohvatiSveKlubove()
+    }
     res.send(data);
 })
 
@@ -222,10 +227,34 @@ router.post('/dodajboravakuklubu', async(req, res) => {
     res.send("boravak u klubu izmjenjen!")
 });
 
+router.post('/boravakuklubu', async(req, res) => {
+    console.log("zzz")
+    console.log(req.body);
+    console.log("zzz")
+    await Igrac.izbrisiBoravakUKlubu(req.body.idklub, req.body.idigrac, req.body.datumodigrazaklub)
+    res.send("boravak u klubu izbrisan! ")
+});
+
 router.get('/sviklubovi', async(req, res) => {
     let data = await Klub.dohvatiSveKlubove();
     res.send(data);
 })
+
+router.get('/sudionici/:id', async(req, res) => {
+    let data = await Natjecanje.dohvatiKluboveUNatjecanju(req.params.id)
+    res.send(data);
+})
+
+router.post('/uklonisudionika', async(req, res) => {
+    let data = await Natjecanje.ukloniSudionika(req.body.idtim, req.body.idnatjecanje)
+    res.send(data);
+})
+
+router.post('/dodajsudionika', async(req, res) => {
+    let data = await Natjecanje.dodajSudionika(req.body.idtim, req.body.idnatjecanje)
+    res.send(data);
+})
+
 
 
 module.exports = router

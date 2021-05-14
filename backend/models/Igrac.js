@@ -154,5 +154,16 @@ module.exports = class Igrac{
         }
     }
 
+    static async izbrisiBoravakUKlubu(idklub, idigrac, datumodigrazaklub){
+        const sql = `DELETE FROM igra_za_klub WHERE idklub = $1 AND idigrac = $2 AND datumodigrazaklub = $3` 
+        const values = [idklub, idigrac, datumodigrazaklub];
+        try {
+            const result = await db.query(sql, values);
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
 
 }
