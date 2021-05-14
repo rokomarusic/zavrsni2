@@ -50,4 +50,15 @@ module.exports = class Natjecanje{
             return null;
         }
     }
+
+    static async ukloniNatjecanje(idnatjecanje){
+        const sql = `DELETE FROM natjecanje WHERE idnatjecanje = $1` 
+        const values = [idnatjecanje];
+        try {
+            await db.query(sql, values);
+        } catch (err) {
+            console.log(err);
+            return null;
+        }
+    }
 }

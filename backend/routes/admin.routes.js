@@ -8,6 +8,7 @@ var Natjecanje = require('../models/Natjecanje');
 var Klub = require('../models/Klub')
 var Sezona = require('../models/Sezona')
 
+
 router.get('/igraci', async (req, res) => {
     let data = await Igrac.dohvatiSveIgrace();
     res.send(data);
@@ -17,6 +18,11 @@ router.get('/igrac/:id', async (req, res) => {
     console.log("EVO GA")
     console.log(req.params.id)
     let data = await Igrac.dohvatiIgracaZaId(req.params.id);
+    if(data.datumrodenjaigrac){
+        let temp3 = new Date(data.datumrodenjaigrac);
+        let date3 = temp3.getDate()+"/"+(temp3.getMonth() + 1)+"/"+temp3.getFullYear();
+        data.datumrodenjaigrac = date3;
+    }
     res.send(data);
 });
 
@@ -153,6 +159,11 @@ router.post('/dodajnatjecanje', async(req, res) => {
     }
 });
 
+router.delete('/natjecanje/:id', async(req, res) => {
+    await Natjecanje.ukloniNatjecanje(req.params.id)
+    res.json("klub izbrisan")
+})
+
 router.post('/izmjeniklub/:id', async(req, res) => {
     console.log("req params id " + req.params.id)
     await Klub.izmjeniKlub(req.params.id, req.body.nazivklub, req.body.godosnutka, req.body.idgrad)
@@ -163,5 +174,58 @@ router.get('/roster/:id', async(req, res) => {
     let data = await Igrac.dohvatiRosterZaSezonu(req.params.id, req.query.sezona)
     res.send(data);
 })
+
+router.get('/igracklubovi/:id', async(req, res) => {
+    let data = await Igrac.dohvatiSveKluboveIgraca(req.params.id);
+    for(let row in data){
+        let temp1 = new Date(data[row].datumodigrazaklub);
+        let date1 = temp1.getDate()+"/"+(temp1.getMonth() + 1)+"/"+temp1.getFullYear();
+        console.log(date1);
+        console.log(temp1);
+        data[row].datumodigrazaklub = date1;
+        if(data[row].datumdoigrazaklub){
+            let temp2 = new Date(data[row].datumdoigrazaklub);
+            let date2 = temp2.getDate()+"/"+(temp2.getMonth() + 1)+"/"+temp2.getFullYear();
+            data[row].datumdoigrazaklub = date2;
+        }
+
+    }
+    res.send(data);
+})
+
+
+router.post('/dodajigraca', async(req, res) => {
+    await Igrac.dodajIgraca(req.body)
+    res.send("Grad dodan");
+});
+
+
+router.post('/izmjeniigraca', async(req, res) => {
+    console.log(req.body);
+    await Igrac.izmjeniIgraca(req.body)
+});
+
+router.delete('/igrac/:id', async(req, res) => {
+    await Igrac.ukloniIgraca(req.params.id);
+    res.json("klub izbrisan")
+})
+
+router.post('/izmjeniboravakuklubu', async(req, res) => {
+    console.log(req.body);
+    await Igrac.izmjeniBoravakUKlubu(req.body)
+    res.send("boravak u klubu izmjenjen!")
+});
+
+router.post('/dodajboravakuklubu', async(req, res) => {
+    console.log(req.body);
+    await Igrac.dodajBoravakUKlubu(req.body)
+    res.send("boravak u klubu izmjenjen!")
+});
+
+router.get('/sviklubovi', async(req, res) => {
+    let data = await Klub.dohvatiSveKlubove();
+    res.send(data);
+})
+
 
 module.exports = router

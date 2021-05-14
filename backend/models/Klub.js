@@ -29,6 +29,22 @@ module.exports = class Klub{
         }
     }
 
+    static async dohvatiSveKlubove(){
+        const sql = `SELECT tim.nazivtim, klub.idklub FROM klub NATURAL JOIN tim` 
+        const values = [];
+        var klubovi = [];
+        try {
+            const result = await db.query(sql, values);
+            for(var i = 0; i < result.rows.length; i++){
+                klubovi[i] = new Klub(result.rows[i]);
+            }
+            return klubovi;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
     static async dodajKlub(nazivtim, godinaosnutka, idgrad){
         const sql1 = `INSERT INTO tim(nazivtim) VALUES ($1);`
         const sql2 = `SELECT MAX(idtim) FROM tim WHERE nazivtim = $1;`
@@ -96,6 +112,7 @@ module.exports = class Klub{
             throw err
         }
     }
+
 
 
 }
