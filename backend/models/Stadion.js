@@ -26,6 +26,38 @@ module.exports = class Stadion{
         }
     }
 
+    static async dohvatiStadioneUDrzavi(iddrzava){
+        const sql = `select * from stadion natural join grad natural join drzava where iddrzava = $1` 
+        const values = [iddrzava];
+        var stadioni = [];
+        try {
+            const result = await db.query(sql, values);
+            for(var i = 0; i < result.rows.length; i++){
+                stadioni[i] = new Stadion(result.rows[i]);
+            }
+            return stadioni;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiSveStadione(){
+        const sql = `select * from stadion natural join grad` 
+        const values = [];
+        var stadioni = [];
+        try {
+            const result = await db.query(sql, values);
+            for(var i = 0; i < result.rows.length; i++){
+                stadioni[i] = new Stadion(result.rows[i]);
+            }
+            return stadioni;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
     static async dodajStadion(nazivstadion, kapacitet, idgrad){
         const sql = `INSERT INTO stadion(nazivstadion, kapacitet, idgrad) VALUES ($1, $2, $3);` 
         const values = [nazivstadion, kapacitet, idgrad];

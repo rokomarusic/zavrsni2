@@ -30,7 +30,8 @@ module.exports = class Utakmica{
         JOIN tim t2 ON utakmica.idgost = t2.idtim
         NATURAL JOIN stadion
         NATURAL JOIN natjecanje
-        WHERE idnatjecanje = $1` 
+        WHERE idnatjecanje = $1
+        ORDER BY datumutakmica DESC` 
         const values = [idnatjecanje];
         var utakmice = [];
         try {
@@ -39,6 +40,59 @@ module.exports = class Utakmica{
                 utakmice[i] = new Utakmica(result.rows[i]);
             }
             return utakmice;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+
+    static async dohvatiUtakmicuZaId(idutakmica){
+        const sql = `select idutakmica, datumutakmica, brgolovadomacin, brgolovagost, t1.nazivtim AS nazivdomacin,
+        t2.nazivtim AS nazivgost, posjecenost, kolo, fazanatjecanje, idstadion, nazivstadion,
+        idnatjecanje, nazivnatjecanje, godinasezona, iddomacin, idgost
+        from utakmica
+        JOIN tim t1 ON utakmica.iddomacin = t1.idtim  
+        JOIN tim t2 ON utakmica.idgost = t2.idtim
+        NATURAL JOIN stadion
+        NATURAL JOIN natjecanje
+        WHERE idutakmica = $1` 
+        const values = [idutakmica];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows[0];
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dodajUtakmicu(utakmica){
+        const sql = `INSERT INTO utakmica(datumutakmica, brgolovadomacin, brgolovagost,
+            posjecenost, kolo, fazanatjecanje, idstadion, idnatjecanje,
+            iddomacin, idgost) VALUES
+($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)` 
+        const values = [utakmica.datumutakmica, utakmica.brgolovadomacin, utakmica.brgolovagost,
+        utakmica.posjecenost, utakmica.kolo, utakmica.fazanatjecanje, utakmica.idstadion,
+        utakmica.idnatjecanje, utakmica.iddomacin, utakmica.idgost];
+        try {
+            const result = await db.query(sql, values);
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async izmjeniUtakmicu(utakmica){
+        const sql = `UPDATE utakmica SET(datumutakmica, brgolovadomacin, brgolovagost,
+            posjecenost, kolo, fazanatjecanje, idstadion, idnatjecanje,
+            iddomacin, idgost) =
+($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) WHERE idutakmica = $11` 
+        const values = [utakmica.datumutakmica, utakmica.brgolovadomacin, utakmica.brgolovagost,
+        utakmica.posjecenost, utakmica.kolo, utakmica.fazanatjecanje, utakmica.idstadion,
+        utakmica.idnatjecanje, utakmica.iddomacin, utakmica.idgost, utakmica.idutakmica];
+        try {
+            const result = await db.query(sql, values);
         } catch (err) {
             console.log(err);
             throw err

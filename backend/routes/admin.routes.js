@@ -7,6 +7,7 @@ var Stadion = require('../models/Stadion')
 var Natjecanje = require('../models/Natjecanje');
 var Klub = require('../models/Klub')
 var Sezona = require('../models/Sezona')
+var Utakmica = require('../models/Utakmica')
 
 
 router.get('/igraci', async (req, res) => {
@@ -252,6 +253,32 @@ router.post('/uklonisudionika', async(req, res) => {
 
 router.post('/dodajsudionika', async(req, res) => {
     let data = await Natjecanje.dodajSudionika(req.body.idtim, req.body.idnatjecanje)
+    res.send(data);
+})
+
+router.get('/utakmice/:id', async(req, res) => {
+    let data = await Utakmica.dohvatiUtakmiceUNatjecanju(req.params.id)
+    res.send(data);
+})
+
+router.get('/utakmica/:id', async(req, res) => {
+    let data = await Utakmica.dohvatiUtakmicuZaId(req.params.id)
+    res.send(data);
+})
+
+router.post('/dodajutakmicu', async(req, res) => {
+    await Utakmica.dodajUtakmicu(req.body)
+    res.send("utakmica dodana");
+})
+
+router.post('/izmjeniutakmicu', async(req, res) => {
+    await Utakmica.izmjeniUtakmicu(req.body)
+    res.send("utakmica dodana");
+})
+
+router.get('/natjecanjestadioni', async(req, res) => {
+    console.log("u natjecanje stadioni")
+    let data = await Stadion.dohvatiSveStadione();
     res.send(data);
 })
 

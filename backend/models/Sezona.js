@@ -9,7 +9,7 @@ module.exports = class Sezona{
     }
 
     static async dohvatiSveSezone(){
-        const sql = `SELECT * FROM sezona` 
+        const sql = `SELECT * FROM sezona ORDER BY godinasezona DESC` 
         const values = [];
         var sezone = [];
         try {
