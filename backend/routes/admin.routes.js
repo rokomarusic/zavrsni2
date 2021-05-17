@@ -8,6 +8,10 @@ var Natjecanje = require('../models/Natjecanje');
 var Klub = require('../models/Klub')
 var Sezona = require('../models/Sezona')
 var Utakmica = require('../models/Utakmica')
+var Penal = require('../models/Penal')
+var Korner = require('../models/Korner');
+const Udarac = require('../models/Udarac');
+const SlobodanUdarac = require('../models/SlobodanUdarac');
 
 
 router.get('/igraci', async (req, res) => {
@@ -128,7 +132,7 @@ router.get('/drzava/klubovi/:id', async(req, res) => {
     if(req.params.id > 0){
         data = await Klub.dohvatiKluboveUDrzavi(req.params.id)
     }else{
-        data = await Klub.dohvatiSveKlubove()
+        data = await Klub.dohvatiSveTimove()
     }
     res.send(data);
 })
@@ -276,11 +280,49 @@ router.post('/izmjeniutakmicu', async(req, res) => {
     res.send("utakmica dodana");
 })
 
+router.delete('/utakmica/:id', async(req, res) => {
+    await Utakmica.ukloniUtakmicu(req.params.id);
+    res.json("utakmica izbrisana")
+})
+
 router.get('/natjecanjestadioni', async(req, res) => {
     console.log("u natjecanje stadioni")
     let data = await Stadion.dohvatiSveStadione();
     res.send(data);
 })
+
+router.get('/rostertim/:id', async(req, res) => {
+    console.log("Dohvati roster tima u sezoni")
+    let data = {}
+    let check = await Igrac.jeliDrzava(req.params.id);
+    if(check){
+        data = await Igrac.dohvatiRosterZaDrzavu(req.params.id, req.query.sezona)
+    }else{
+        data = await Igrac.dohvatiRosterZaTim(req.params.id, req.query.sezona)
+    }
+    res.send(data);
+})
+
+router.post('/dodajpenal', async(req, res) => {
+    await Penal.dodajPenal(req.body);
+    res.send("Penal dodan");
+})
+
+router.post('/dodajkorner', async(req, res) => {
+    await Korner.dodajKorner(req.body)
+    res.send("Korner dodan");
+})
+
+router.post('/dodajudarac', async(req, res) => {
+    await Udarac.dodajUdarac(req.body)
+    res.send("Udarac dodan");
+})
+
+router.post('/dodajslobodni', async(req, res) => {
+    await SlobodanUdarac.dodajSlobodanUdarac(req.body)
+    res.send("Slobodan udarac dodan");
+})
+
 
 
 

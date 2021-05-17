@@ -80,6 +80,55 @@ module.exports = class Igrac{
         }
     }
 
+    static async dohvatiRosterZaTim(idtim, godinasezona){
+        const sql = `SELECT * FROM igra_za_klub NATURAL JOIN igrac NATURAL JOIN klub NATURAL JOIN tim
+        WHERE idtim = $1 AND igra_za_klub.godinadolazakigrac <= $2  AND (igra_za_klub.godinaodlazakigrac >= $2 OR igra_za_klub.godinaodlazakigrac IS NULL)` 
+        const values = [idtim, godinasezona];
+        var igraci = [];
+        try {
+            const result = await db.query(sql, values);
+            for(var i = 0; i < result.rows.length; i++){
+                igraci[i] = new Igrac(result.rows[i]);
+            }
+            return igraci;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async jeliDrzava(idtim){
+        const sql = `select count(idtim) from drzava where idtim = $1` 
+        const values = [idtim];
+        try {
+            const result = await db.query(sql, values);
+            console.log("rez " + result.rows[0].count)
+            console.log("rez " + parseInt(result.rows[0].count) > 0)
+            return parseInt(result.rows[0].count) > 0;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    
+    static async dohvatiRosterZaDrzavu(idtim, godinasezona){
+        const sql = `select * from igrac NATURAL JOIN drzava JOIN tim ON tim.idtim = drzava.idtim WHERE EXTRACT(YEAR FROM datumodigrazadrzavu) < $2
+        AND (EXTRACT(YEAR FROM datumdoigrazadrzavu) > $2 OR datumdoigrazadrzavu IS NULL) AND tim.idtim = $1` 
+        const values = [idtim, godinasezona];
+        var igraci = [];
+        try {
+            const result = await db.query(sql, values);
+            for(var i = 0; i < result.rows.length; i++){
+                igraci[i] = new Igrac(result.rows[i]);
+            }
+            return igraci;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
     static async dohvatiIgracaZaId(idigrac){
         const sql = `SELECT * FROM  igrac WHERE idigrac = $1` 
         const values = [idigrac];

@@ -98,4 +98,15 @@ module.exports = class Utakmica{
             throw err
         }
     }
+
+    static async ukloniUtakmicu(idutakmica){
+        const sql = `DELETE FROM utakmica WHERE idutakmica = $1` 
+        const values = [idutakmica];
+        try {
+            const result = await db.query(sql, values);
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
 }
