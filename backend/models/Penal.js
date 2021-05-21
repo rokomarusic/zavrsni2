@@ -14,6 +14,12 @@ module.exports = class Penal{
         this.stranaigracpenal = dbPenal.stranaigracpenal
         this.stranagolmanpenal = dbPenal.stranagolmanpenal
         this.visinaigracpenal = dbPenal.visinaigracpenal
+        this.imeigrac = dbPenal.imeigrac
+        this.prezimeigrac = dbPenal.prezimeigrac
+        this.nadimakigrac = dbPenal.nadimakigrac
+        this.imegolman = dbPenal.imegolman
+        this.prezimegolman = dbPenal.prezimegolman
+        this.nadimakgolman = dbPenal.nadimakgolman
     }
 
     static async dodajPenal(penal){
@@ -31,6 +37,39 @@ module.exports = class Penal{
             const values3 = [penal.stranaigracpenal, penal.visinaigracpenal, penal.stranagolmanpenal, 
             penal.idutakmica, result2.rows[0].max]
             await db.query(sql3, values3)
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiPenaleUUtakmici(idutakmica){
+        const sql = `select idutakmica, rednibrojuutakmici, idpenal, stranaigracpenal, visinaigracpenal, stranagolmanpenal,
+        minuta, zabijengol, pogodjenokvir,
+        i1.idigrac as idigrac, i1.imeigrac as imeigrac, i1.prezimeigrac as prezimeigrac, i1.nadimakigrac as nadimakigrac,
+        i2.idigrac as idgolman, i2.imeigrac as imegolman, i2.prezimeigrac as prezimegolman, i1.nadimakigrac as nadimakgolman
+        from penal natural join dogadaj  
+        join igrac i1 on dogadaj.idigrac = i1.idigrac 
+        join igrac i2 on dogadaj.idgolman = i2.idigrac
+        WHERE idutakmica = $1
+        ORDER BY minuta` 
+        const values = [idutakmica];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+
+    static async ukloniPenal(iddogadaj){
+        const sql = `DELETE FROM penal WHERE idpenal = $1` 
+        const values = [iddogadaj];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows;
         } catch (err) {
             console.log(err);
             throw err

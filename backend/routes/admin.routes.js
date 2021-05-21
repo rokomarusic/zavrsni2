@@ -12,6 +12,7 @@ var Penal = require('../models/Penal')
 var Korner = require('../models/Korner');
 const Udarac = require('../models/Udarac');
 const SlobodanUdarac = require('../models/SlobodanUdarac');
+var Trener = require('../models/Trener');
 
 
 router.get('/igraci', async (req, res) => {
@@ -323,6 +324,115 @@ router.post('/dodajslobodni', async(req, res) => {
     res.send("Slobodan udarac dodan");
 })
 
+
+router.get('/korneri/:id', async(req, res) => {
+    let data = await Korner.dohvatiKornereUUtakmici(req.params.id);
+    res.send(data);
+})
+
+router.get('/penali/:id', async(req, res) => {
+    let data = await Penal.dohvatiPenaleUUtakmici(req.params.id);
+    res.send(data);
+})
+
+router.get('/udarci/:id', async(req, res) => {
+    let data = await Udarac.dohvatiUdarceUUtakmici(req.params.id);
+    res.send(data);
+})
+
+router.get('/slobodni/:id', async(req, res) => {
+    let data = await SlobodanUdarac.dohvatiSlobodneUdarceUUtakmici(req.params.id);
+    res.send(data);
+})
+
+router.delete('/penal/:id', async(req, res) => {
+    let data = await Penal.ukloniPenal(req.params.id)
+    res.send(data);
+})
+
+router.delete('/korner/:id', async(req, res) => {
+    let data = await Korner.ukloniKorner(req.params.id)
+    res.send(data);
+})
+
+router.delete('/udarac/:id', async(req, res) => {
+    let data = await Udarac.ukloniUdarac(req.params.id)
+    res.send(data);
+})
+
+router.delete('/slobodni/:id', async(req, res) => {
+    let data = await SlobodanUdarac.ukloniSlobodni(req.params.id)
+    res.send(data);
+})
+
+router.get('/treneri', async(req, res) => {
+    let data = await Trener.dohvatiSveTrenere()
+    res.send(data);
+})
+
+router.delete('/trener/:id', async(req, res) => {
+    let data = await Trener.ukloniTrenera(req.params.id)
+    res.send(data);
+})
+
+
+router.get('/trener/:id', async(req, res) => {
+    let data = await Trener.dohvatiTreneraZaId(req.params.id)
+    let date = new Date(data.datumrodenjatrener);
+    data.datumrodenjatrener = date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear()
+    res.send(data);
+})
+
+router.get('/trenerboravci/:id', async(req, res) => {
+    let data = await Trener.dohvatiSveTimoveTrenera(req.params.id)
+    for(let i = 0; i < data.length; i++){
+        let date1 = new Date(data[i].datumodtrenira);
+        let date2 = new Date(data[i].datumdotrenira);
+        data[i].datumodtrenira = date1.getDate() + "/" + (date1.getMonth() + 1) + "/" + date1.getFullYear()
+        if(data[i].datumdotrenira){
+            data[i].datumdotrenira = date2.getDate() + "/" + (date2.getMonth() + 1) + "/" + date2.getFullYear()
+        }
+    }
+    res.send(data);
+})
+
+router.post('/dodajtrenera', async(req, res) => {
+    await Trener.dodajTrenera(req.body)
+    res.send("trener dodan");
+})
+
+router.post('/izmjenitrenera', async(req, res) => {
+    await Trener.izmjeniTrenera(req.body)
+    res.send("trener dodan");
+})
+
+router.post('/dodajposao', async(req, res) => {
+    await Trener.dodajPosao(req.body)
+    res.send("posao dodan");
+})
+
+router.post('/izmjeniposao', async(req, res) => {
+    await Trener.izmjeniPosao(req.body)
+    res.send("posao dodan");
+})
+
+router.post('/izbrisiposao', async(req, res) => {
+    console.log("zzz")
+    console.log(req.body);
+    console.log("zzz")
+    await Trener.ukloniPosao(req.body)
+    res.send("boravak u klubu izbrisan! ")
+});
+
+router.get('/timovi', async(req, res) => {
+    let data = await Klub.dohvatiSveTimove()
+    res.send(data);
+})
+
+router.get('/trenerisezona/:id', async(req, res) => {
+    let data = await Trener.dohvatiTrenereUSezoni(req.params.id, req.query.sezona)
+    res.send(data);
+})
 
 
 

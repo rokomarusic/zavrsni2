@@ -65,7 +65,7 @@ module.exports = class Igrac{
 
     static async dohvatiRosterZaSezonu(idklub, godinasezona){
         const sql = `SELECT * FROM igra_za_klub NATURAL JOIN igrac NATURAL JOIN klub NATURAL JOIN tim
-        WHERE idklub = $1 AND igra_za_klub.godinadolazakigrac <= $2  AND (igra_za_klub.godinaodlazakigrac >= $2 OR igra_za_klub.godinaodlazakigrac IS NULL)` 
+        WHERE idtim = $1 AND igra_za_klub.godinadolazakigrac <= $2  AND (igra_za_klub.godinaodlazakigrac >= $2 OR igra_za_klub.godinaodlazakigrac IS NULL)` 
         const values = [idklub, godinasezona];
         var igraci = [];
         try {

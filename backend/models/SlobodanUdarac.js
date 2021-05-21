@@ -16,6 +16,12 @@ module.exports = class SlobodanUdarac{
         this.udaljenostudarac = dbSlobodni.udaljenostudarac
         this.pogodiozivizid = dbSlobodni.pogodiozivizid
         this.brojigracazivizid = dbSlobodni.brojigracazivizid
+        this.imeigrac = dbSlobodni.imeigrac
+        this.prezimeigrac = dbSlobodni.prezimeigrac
+        this.nadimakigrac = dbSlobodni.nadimakigrac
+        this.imegolman = dbSlobodni.imegolman
+        this.prezimegolman = dbSlobodni.prezimegolman
+        this.nadimakgolman = dbSlobodni.nadimakgolman
     }
 
     static async dodajSlobodanUdarac(udarac){
@@ -33,6 +39,38 @@ module.exports = class SlobodanUdarac{
             const values3 = [udarac.stranaigracslobodni, udarac.udaljenostslobodni, udarac.stranagolmanslobodni, 
                 udarac.pogodiozivizid, udarac.brojigracazivizid, udarac.idutakmica, result2.rows[0].max]
             await db.query(sql3, values3)
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiSlobodneUdarceUUtakmici(idutakmica){
+        const sql = `select idutakmica, rednibrojuutakmici, idslobodni, stranaigracslobodni, udaljenostslobodni, stranagolmanslobodni,
+        pogodiozivizid, brojigracazivizid, minuta, zabijengol, pogodjenokvir,
+        i1.idigrac as idigrac, i1.imeigrac as imeigrac, i1.prezimeigrac as prezimeigrac, i1.nadimakigrac as nadimakigrac,
+        i2.idigrac as idgolman, i2.imeigrac as imegolman, i2.prezimeigrac as prezimegolman, i1.nadimakigrac as nadimakgolman
+        from slobodanudarac natural join dogadaj  
+        join igrac i1 on dogadaj.idigrac = i1.idigrac 
+        join igrac i2 on dogadaj.idgolman = i2.idigrac
+        WHERE idutakmica = $1
+        ORDER BY minuta` 
+        const values = [idutakmica];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async ukloniSlobodni(iddogadaj){
+        const sql = `DELETE FROM slobodanudarac WHERE idslobodni = $1` 
+        const values = [iddogadaj];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows;
         } catch (err) {
             console.log(err);
             throw err
