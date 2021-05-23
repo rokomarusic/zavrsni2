@@ -15,7 +15,8 @@ module.exports = class Igrac{
         this.godinaodlazakigrac = dbIgrac.godinaodlazakigrac
         this.datumodigra = dbIgrac.datumodigra;
         this.datumdoigra = dbIgrac.datumdoigra;
-    }
+        this.brgolova = dbIgrac.count
+    }   
 
     static async dohvatiSveIgrace(){
         const sql = `SELECT * FROM  igrac` 
@@ -208,6 +209,189 @@ module.exports = class Igrac{
         const values = [idklub, idigrac, datumodigrazaklub];
         try {
             const result = await db.query(sql, values);
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiNajboljeStrijelce(){
+        const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija, (select count(*)from dogadaj 
+        where idigrac = igrac.idigrac and zabijengol = 1) 
+        from igrac
+order by (select count(*) from dogadaj where idigrac = igrac.idigrac and zabijengol = 1) DESC LIMIT 50` 
+        const values = [];
+        var igraci = [];
+        try {
+            const result = await db.query(sql, values);
+            for(var i = 0; i < result.rows.length; i++){
+                igraci[i] = new Igrac(result.rows[i]);
+            }
+            return igraci;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiNajboljeStrijelcePenala(){
+        const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija, (select count(*)from dogadaj 
+        natural join penal where idigrac = igrac.idigrac and zabijengol = 1) 
+        from igrac
+order by (select count(*) from dogadaj natural join penal where idigrac = igrac.idigrac and zabijengol = 1) DESC LIMIT 50` 
+        const values = [];
+        var igraci = [];
+        try {
+            const result = await db.query(sql, values);
+            for(var i = 0; i < result.rows.length; i++){
+                igraci[i] = new Igrac(result.rows[i]);
+            }
+            return igraci;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiNajboljeStrijelceSlobodnih(){
+        const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija, (select count(*)from dogadaj 
+        natura join slobodanudarac where idigrac = igrac.idigrac and zabijengol = 1) 
+        from igrac
+order by (select count(*) from dogadaj natural join slobodanudarac where idigrac = igrac.idigrac and zabijengol = 1) DESC LIMIT 50` 
+        const values = [];
+        var igraci = [];
+        try {
+            const result = await db.query(sql, values);
+            for(var i = 0; i < result.rows.length; i++){
+                igraci[i] = new Igrac(result.rows[i]);
+            }
+            return igraci;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiNajboljeStrijelceUNatjecanju(idnatjecanje){
+        const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija,
+        (select count(*)from dogadaj natural join utakmica where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1)
+        from igrac
+        order by (select count(*) from dogadaj natural join utakmica where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1)
+        DESC LIMIT 50` 
+        const values = [idnatjecanje];
+        var igraci = [];
+        try {
+            const result = await db.query(sql, values);
+            for(var i = 0; i < result.rows.length; i++){
+                igraci[i] = new Igrac(result.rows[i]);
+            }
+            return igraci;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiNajboljeStrijelcePenalaUNatjecanju(idnatjecanje){
+        const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija,
+        (select count(*)from dogadaj natural join penal natural join utakmica where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1)
+        from igrac
+        order by (select count(*) from dogadaj natural join penal natural join utakmica where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1)
+        DESC LIMIT 50` 
+        const values = [idnatjecanje];
+        var igraci = [];
+        try {
+            const result = await db.query(sql, values);
+            for(var i = 0; i < result.rows.length; i++){
+                igraci[i] = new Igrac(result.rows[i]);
+            }
+            return igraci;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiNajboljeStrijelceSlobodnihUNatjecanju(idnatjecanje){
+        const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija,
+        (select count(*)from dogadaj natural join slobodanudarac natural join utakmica where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1)
+        from igrac
+        order by (select count(*) from dogadaj natural join slobodanudarac natural join utakmica where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1)
+        DESC LIMIT 50` 
+        const values = [idnatjecanje];
+        var igraci = [];
+        try {
+            const result = await db.query(sql, values);
+            for(var i = 0; i < result.rows.length; i++){
+                igraci[i] = new Igrac(result.rows[i]);
+            }
+            return igraci;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiNajboljeStrijelceUSezoni(godinasezona){
+        const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija,
+        (select count(*)from dogadaj natural join utakmica natural join natjecanje 
+         where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1)
+        from igrac
+        order by (select count(*) from dogadaj natural join utakmica natural join natjecanje 
+                  where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1)
+        DESC LIMIT 50` 
+        const values = [godinasezona];
+        var igraci = [];
+        try {
+            const result = await db.query(sql, values);
+            for(var i = 0; i < result.rows.length; i++){
+                igraci[i] = new Igrac(result.rows[i]);
+            }
+            return igraci;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiNajboljeStrijelcePenalaUSezoni(godinasezona){
+        const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija,
+        (select count(*)from dogadaj natural join penal natural join utakmica natural join natjecanje 
+         where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1)
+        from igrac
+        order by (select count(*) from dogadaj natural join penal natural join utakmica natural join natjecanje 
+                  where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1)
+        DESC LIMIT 50` 
+        const values = [godinasezona];
+        var igraci = [];
+        try {
+            const result = await db.query(sql, values);
+            for(var i = 0; i < result.rows.length; i++){
+                igraci[i] = new Igrac(result.rows[i]);
+            }
+            return igraci;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiNajboljeStrijelceSlobodnihUSezoni(godinasezona){
+        const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija,  
+        (select count(*)from dogadaj natural join slobodanudarac natural join utakmica natural join natjecanje 
+         where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1)
+        from igrac
+        order by (select count(*) from dogadaj natural join slobodanudarac natural join utakmica natural join natjecanje 
+                  where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1)
+        DESC LIMIT 50` 
+        const values = [godinasezona];
+        var igraci = [];
+        try {
+            const result = await db.query(sql, values);
+            for(var i = 0; i < result.rows.length; i++){
+                igraci[i] = new Igrac(result.rows[i]);
+            }
+            return igraci;
         } catch (err) {
             console.log(err);
             throw err
