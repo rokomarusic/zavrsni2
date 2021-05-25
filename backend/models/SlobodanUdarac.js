@@ -94,8 +94,8 @@ module.exports = class SlobodanUdarac{
 
     static async dohvatiStranaSlobodanUdaracGolmana(idigrac){
         const sql = `select stranagolmanslobodni, zabijengol, count(idslobodni) from slobodanudarac natural join dogadaj
-        group by stranagolmanslobodni, zabijengol, idigrac
-        having idigrac = $1
+        group by stranagolmanslobodni, zabijengol, idgolman
+        having idgolman = $1
         order by stranagolmanslobodni` 
         const values = [idigrac];
         try {
@@ -124,8 +124,8 @@ module.exports = class SlobodanUdarac{
 
     static async dohvatiBrojIgracaZiviZid(idigrac){
         const sql = `select brojigracazivizid, zabijengol, count(idslobodni) from slobodanudarac natural join dogadaj
-        group by brojigracazivizid, zabijengol, idigrac
-        having idigrac = $1
+        group by brojigracazivizid, zabijengol, idgolman
+        having idgolman = $1
         order by brojigracazivizid` 
         const values = [idigrac];
         try {
@@ -137,7 +137,7 @@ module.exports = class SlobodanUdarac{
         }
     }
 
-    static async dohvatiIgracAvgUdaljenostUdarac(idigrac){
+    static async dohvatiIgracAvgUdaljenostSlobodanUdarac(idigrac){
         const sql = `select ROUND(avg(udaljenostslobodni), 2) as avgdist from slobodanudarac
          natural join dogadaj where idigrac = $1` 
         const values = [idigrac];
@@ -165,6 +165,21 @@ module.exports = class SlobodanUdarac{
         }
     }
 
+    static async dohvatiPostotakObranaSlobodnih(idigrac){
+        const sql = `select CAST ((select count(idslobodni) from slobodanudarac natural join dogadaj where zabijengol = 0
+         and idgolman = $1)  AS DOUBLE PRECISION)
+        / (select count(idslobodni) from slobodanudarac natural join dogadaj where idgolman = $1) as preciznost
+        WHERE EXISTS(select idslobodni from slobodanudarac natural join dogadaj where idgolman = $1);` 
+        const values = [idigrac];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
     //za sezonu
 
     static async dohvatiStranaSlobodanUdaracIgracaZaSezonu(idigrac, godinasezona){
@@ -179,6 +194,7 @@ module.exports = class SlobodanUdarac{
             return result.rows
         } catch (err) {
             console.log(err);
+            console.log(6)
             throw err
         }
     }
@@ -186,8 +202,8 @@ module.exports = class SlobodanUdarac{
     static async dohvatiStranaSlobodanUdaracGolmanaZaSezonu(idigrac, godinasezona){
         const sql = `select stranagolmanslobodni, zabijengol, count(idslobodni) from slobodanudarac natural join dogadaj
         natural join utakmica natural join natjecanje
-        group by stranagolmanslobodni, zabijengol, idigrac, godinasezona
-        having idigrac = $1 and godinasezona = $2
+        group by stranagolmanslobodni, zabijengol, idgolman, godinasezona
+        having idgolman = $1 and godinasezona = $2
         order by stranagolmanslobodni` 
         const values = [idigrac, godinasezona];
         try {
@@ -195,6 +211,7 @@ module.exports = class SlobodanUdarac{
             return result.rows
         } catch (err) {
             console.log(err);
+            console.log(5)
             throw err
         }
     }
@@ -211,6 +228,7 @@ module.exports = class SlobodanUdarac{
             return result.rows
         } catch (err) {
             console.log(err);
+            console.log(4)
             throw err
         }
     }
@@ -218,8 +236,8 @@ module.exports = class SlobodanUdarac{
     static async dohvatiBrojIgracaZiviZidZaSezonu(idigrac, godinasezona){
         const sql = `select brojigracazivizid, zabijengol, count(idslobodni) from slobodanudarac natural join dogadaj
         natural join utakmica natural join natjecanje
-        group by brojigracazivizid, zabijengol, idigrac, godinasezona
-        having idigrac = $1 and godinasezona = $2
+        group by brojigracazivizid, zabijengol, idgolman, godinasezona
+        having idgolman = $1 and godinasezona = $2
         order by brojigracazivizid` 
         const values = [idigrac, godinasezona];
         try {
@@ -227,11 +245,12 @@ module.exports = class SlobodanUdarac{
             return result.rows
         } catch (err) {
             console.log(err);
+            console.log(3)
             throw err
         }
     }
 
-    static async dohvatiIgracAvgUdaljenostUdaracZaSezonu(idigrac, godinasezona){
+    static async dohvatiIgracAvgUdaljenostSlobodanUdaracZaSezonu(idigrac, godinasezona){
         const sql = `select ROUND(avg(udaljenostslobodni), 2) as avgdist from slobodanudarac
          natural join dogadaj natural join utakmica natural join natjecanje where idigrac = $1  and godinasezona = $2` 
         const values = [idigrac, godinasezona];
@@ -240,6 +259,7 @@ module.exports = class SlobodanUdarac{
             return result.rows
         } catch (err) {
             console.log(err);
+            console.log(2)
             throw err
         }
     }
@@ -258,6 +278,26 @@ module.exports = class SlobodanUdarac{
             return result.rows
         } catch (err) {
             console.log(err);
+            console.log(1)
+            throw err
+        }
+    }
+
+    static async dohvatiPostotakObranaSlobodnihZaSezonu(idigrac, godinasezona){
+        const sql = `select CAST ((select count(idslobodni) from slobodanudarac natural join dogadaj 
+        natural join utakmica natural join natjecanje where zabijengol = 0  and godinasezona = $2
+         and idgolman = $1)  AS DOUBLE PRECISION)
+        / (select count(idslobodni) from slobodanudarac natural join dogadaj 
+        natural join utakmica natural join natjecanje where idgolman = $1  and godinasezona = $2) as preciznost
+        WHERE EXISTS(select idslobodni from slobodanudarac natural join dogadaj 
+            natural join utakmica natural join natjecanje where idgolman = $1  and godinasezona = $2);` 
+        const values = [idigrac, godinasezona];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            console.log(1)
             throw err
         }
     }

@@ -93,8 +93,8 @@ module.exports = class Udarac{
 
     static async dohvatiStraneGolmanaUdaraca(idigrac){
         const sql = `select stranagolmanudarac, zabijengol, count(idudarac) from udarac natural join dogadaj
-        group by stranagolmanudarac, zabijengol, idigrac
-        having idigrac = $1
+        group by stranagolmanudarac, zabijengol, idgolman
+        having idgolman = $1
         order by stranagolmanudarac` 
         const values = [idigrac];
         try {
@@ -149,6 +149,21 @@ module.exports = class Udarac{
         }
     }
 
+    static async dohvatiPostotakObranaUdaraca(idigrac){
+        const sql = `select CAST ((select count(idudarac) from udarac natural join dogadaj where zabijengol = 0
+        and idgolman = $1)  AS DOUBLE PRECISION)
+       / (select count(idudarac) from udarac natural join dogadaj where idgolman = $1) as preciznost
+       WHERE EXISTS(select idudarac from udarac natural join dogadaj where idgolman = $1);` 
+        const values = [idigrac];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
     //za sezonu
 
     static async dohvatiStraneIgracaUdaracaZaSezonu(idigrac, godinasezona){
@@ -171,8 +186,8 @@ module.exports = class Udarac{
     static async dohvatiStraneGolmanaUdaracaZaSezonu(idigrac, godinasezona){
         const sql = `select stranagolmanudarac, zabijengol, count(idudarac) from udarac natural join dogadaj
         natural join utakmica natural join natjecanje
-        group by stranagolmanudarac, zabijengol, idigrac, godinasezona
-        having idigrac = $1 and godinasezona = $2
+        group by stranagolmanudarac, zabijengol, idgolman, godinasezona
+        having idgolman = $1 and godinasezona = $2
         order by stranagolmanudarac` 
         const values = [idigrac, godinasezona];
         try {
@@ -224,6 +239,24 @@ module.exports = class Udarac{
        / (select count(idudarac) from udarac natural join dogadaj 
        natural join utakmica natural join natjecanje where idigrac = $1  and godinasezona = $2) as preciznost
        WHERE EXISTS(select idudarac from udarac natural join dogadaj  natural join utakmica natural join natjecanje where idigrac = $1  and godinasezona = $2);` 
+        const values = [idigrac, godinasezona];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            console.log("AAAAAAAAAAAAAAAAAAAAAAAa")
+            throw err
+        }
+    }
+
+    static async dohvatiPostotakObranaUdaracaZaSezonu(idigrac, godinasezona){
+        const sql = `select CAST ((select count(idudarac) from udarac natural join dogadaj 
+        natural join utakmica natural join natjecanje where zabijengol = 0
+        and idgolman = $1  and godinasezona = $2)  AS DOUBLE PRECISION)
+       / (select count(idudarac) from udarac natural join dogadaj 
+       natural join utakmica natural join natjecanje where idgolman = $1  and godinasezona = $2) as preciznost
+       WHERE EXISTS(select idudarac from udarac natural join dogadaj  natural join utakmica natural join natjecanje where idgolman = $1  and godinasezona = $2);` 
         const values = [idigrac, godinasezona];
         try {
             const result = await db.query(sql, values);

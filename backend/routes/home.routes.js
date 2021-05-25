@@ -7,6 +7,7 @@ var Penal = require('../models/Penal')
 var Korner = require('../models/Korner');
 const Udarac = require('../models/Udarac');
 const SlobodanUdarac = require('../models/SlobodanUdarac');
+const { dohvatiPreciznostSlobodnihUdaracaIgraca } = require('../models/SlobodanUdarac');
 
 router.get('/logout', async(req, res, next) =>{
     req.session.user = undefined;
@@ -98,6 +99,16 @@ router.get('/igracstranepenala', async(req, res) => {
     res.send(data);
 })
 
+router.get('/golmanstranepenala', async(req, res) => {
+    let data = await Penal.dohvatiStraneGolmanaPenala(req.query.igrac)
+    res.send(data);
+})
+
+router.get('/golmanstraneudarci', async(req, res) => {
+    let data = await Udarac.dohvatiStraneGolmanaUdaraca(req.query.igrac)
+    res.send(data);
+})
+
 router.get('/igracvisinepenala', async(req, res) => {
     let data = await Penal.dohvatiVisineIgracaPenala(req.query.igrac)
     res.send(data);
@@ -168,6 +179,11 @@ router.get('/preciznostslobodni', async(req, res) => {
     res.send(data);
 })
 
+router.get('/udaljenostslobodni', async(req, res) => {
+    let data = await SlobodanUdarac.dohvatiIgracAvgUdaljenostSlobodanUdarac(req.query.igrac)
+    res.send(data);
+})
+
 router.get('/igracpreciznostkorner', async(req, res) => {
     let data = await Korner.dohvatiPreciznostKorneraIgraca(req.query.igrac)
     res.send(data);
@@ -201,6 +217,16 @@ router.get('/igracprosjecnaudaljenostudaracasezona', async(req, res) => {
 
 router.get('/igracstraneudaracasezona', async(req, res) => {
     let data = await Udarac.dohvatiStraneIgracaUdaracaZaSezonu(req.query.igrac, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/golmanstranepenalasezona', async(req, res) => {
+    let data = await Penal.dohvatiStraneGolmanaPenalaZaSezonu(req.query.igrac, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/golmanstraneudarcisezona', async(req, res) => {
+    let data = await Udarac.dohvatiStraneGolmanaUdaracaZaSezonu(req.query.igrac, req.query.sezona)
     res.send(data);
 })
 
@@ -249,8 +275,54 @@ router.get('/preciznostslobodnisezona', async(req, res) => {
     res.send(data);
 })
 
+router.get('/udaljenostslobodnisezona', async(req, res) => {
+    let data = await SlobodanUdarac.dohvatiIgracAvgUdaljenostSlobodanUdaracZaSezonu(req.query.igrac, req.query.sezona)
+    res.send(data);
+})
+
 router.get('/igracpreciznostkornersezona', async(req, res) => {
     let data = await Korner.dohvatiPreciznostKorneraIgracaZaSezonu(req.query.igrac, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/postotakobranapenal', async(req, res) => {
+    let data = await Penal.dohvatiPostotakObranaPenala(req.query.igrac)
+    res.send(data);
+})
+
+router.get('/postotakobranakorner', async(req, res) => {
+    let data = await Korner.dohvatiPostotakObranaKornera(req.query.igrac)
+    res.send(data);
+})
+
+router.get('/postotakobranaudarac', async(req, res) => {
+    let data = await Udarac.dohvatiPostotakObranaUdaraca(req.query.igrac)
+    res.send(data);
+})
+
+router.get('/postotakobranaslobodni', async(req, res) => {
+    let data = await SlobodanUdarac.dohvatiPostotakObranaSlobodnih(req.query.igrac)
+    res.send(data);
+})
+
+
+router.get('/postotakobranapenalsezona', async(req, res) => {
+    let data = await Penal.dohvatiPostotakObranaPenalaZaSezonu(req.query.igrac, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/postotakobranakornersezona', async(req, res) => {
+    let data = await Korner.dohvatiPostotakObranaKorneraZaSezonu(req.query.igrac, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/postotakobranaudaracsezona', async(req, res) => {
+    let data = await Udarac.dohvatiPostotakObranaUdaracaZaSezonu(req.query.igrac, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/postotakobranaslobodnisezona', async(req, res) => {
+    let data = await SlobodanUdarac.dohvatiPostotakObranaSlobodnihZaSezonu(req.query.igrac, req.query.sezona)
     res.send(data);
 })
 

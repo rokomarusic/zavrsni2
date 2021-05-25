@@ -107,8 +107,8 @@ module.exports = class Korner{
 
     static async dohvatiGolmanIzletioNaKorneru(idigrac){
         const sql = `select golmanizletio, zabijengol, count(idkorner) from korner natural join dogadaj
-        group by golmanizletio, zabijengol, idigrac
-        having idigrac = $1
+        group by golmanizletio, zabijengol, idgolman
+        having idgolman = $1
         order by golmanizletio` 
         const values = [idigrac];
         try {
@@ -135,6 +135,21 @@ module.exports = class Korner{
         }
     }
 
+    static async dohvatiPostotakObranaKornera(idigrac){
+        const sql = `select CAST ((select count(idkorner) from korner natural join dogadaj where zabijengol = 0
+         and idgolman = $1)  AS DOUBLE PRECISION)
+        / (select count(idkorner) from korner natural join dogadaj where idgolman = $1) as preciznost
+        WHERE EXISTS(select idkorner from korner natural join dogadaj where idgolman = $1);` 
+        const values = [idigrac];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
 
     //za sezonu
 
@@ -150,6 +165,7 @@ module.exports = class Korner{
             return result.rows
         } catch (err) {
             console.log(err);
+            console.log("BBBBBBBBBBBB")
             throw err
         }
     }
@@ -166,6 +182,7 @@ module.exports = class Korner{
             return result.rows
         } catch (err) {
             console.log(err);
+            console.log("BBBBBBBBBBBB")
             throw err
         }
     }
@@ -173,8 +190,8 @@ module.exports = class Korner{
     static async dohvatiGolmanIzletioNaKorneruZaSezonu(idigrac, godinasezona){
         const sql = `select golmanizletio, zabijengol, count(idkorner) from korner natural join dogadaj
         natural join utakmica natural join natjecanje
-        group by golmanizletio, zabijengol, idigrac, godinasezona
-        having idigrac = $1  and godinasezona = $2
+        group by golmanizletio, zabijengol, idgolman, godinasezona
+        having idgolman = $1  and godinasezona = $2
         order by golmanizletio` 
         const values = [idigrac, godinasezona];
         try {
@@ -182,6 +199,7 @@ module.exports = class Korner{
             return result.rows
         } catch (err) {
             console.log(err);
+            console.log("BBBBBBBBBBBB")
             throw err
         }
     }
@@ -200,6 +218,26 @@ module.exports = class Korner{
             return result.rows
         } catch (err) {
             console.log(err);
+            console.log("BBBBBBBBBBBB")
+            throw err
+        }
+    }
+
+    static async dohvatiPostotakObranaKorneraZaSezonu(idigrac, godinasezona){
+        const sql = `select CAST ((select count(idkorner) from korner natural join dogadaj 
+        natural join utakmica natural join natjecanje where zabijengol = 0 and godinasezona = $2
+         and idgolman = $1)  AS DOUBLE PRECISION)
+        / (select count(idkorner) from korner natural join dogadaj 
+        natural join utakmica natural join natjecanje where idgolman = $1  and godinasezona = $2) as preciznost
+        WHERE EXISTS(select idkorner from korner natural join dogadaj 
+            natural join utakmica natural join natjecanje where idgolman = $1  and godinasezona = $2);` 
+        const values = [idigrac, godinasezona];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            console.log("BBBBBBBBBBBB")
             throw err
         }
     }

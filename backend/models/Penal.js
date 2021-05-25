@@ -108,8 +108,8 @@ module.exports = class Penal{
 
     static async dohvatiStraneGolmanaPenala(idigrac){
         const sql = `select stranagolmanpenal, zabijengol, count(idpenal) from penal natural join dogadaj
-        group by stranagolmanpenal, zabijengol, idigrac
-        having idigrac = $1
+        group by stranagolmanpenal, zabijengol, idgolman
+        having idgolman = $1
         order by stranagolmanpenal` 
         const values = [idigrac];
         try {
@@ -126,6 +126,21 @@ module.exports = class Penal{
          and idigrac = $1)  AS DOUBLE PRECISION)
         / (select count(idpenal) from penal natural join dogadaj where idigrac = $1) as preciznost
         WHERE EXISTS(select idpenal from penal natural join dogadaj where idigrac = $1);` 
+        const values = [idigrac];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiPostotakObranaPenala(idigrac){
+        const sql = `select CAST ((select count(idpenal) from penal natural join dogadaj where zabijengol = 0
+         and idgolman = $1)  AS DOUBLE PRECISION)
+        / (select count(idpenal) from penal natural join dogadaj where idgolman = $1) as preciznost
+        WHERE EXISTS(select idpenal from penal natural join dogadaj where idgolman = $1);` 
         const values = [idigrac];
         try {
             const result = await db.query(sql, values);
@@ -176,8 +191,8 @@ module.exports = class Penal{
     static async dohvatiStraneGolmanaPenalaZaSezonu(idigrac, godinasezona){
         const sql = `select stranagolmanpenal, zabijengol, count(idpenal) from penal natural join dogadaj
         natural join utakmica natural join natjecanje
-        group by stranagolmanpenal, zabijengol, idigrac, godinasezona
-        having idigrac = $1 and godinasezona = $2
+        group by stranagolmanpenal, zabijengol, idgolman, godinasezona
+        having idgolman = $1 and godinasezona = $2
         order by stranagolmanpenal` 
         const values = [idigrac, godinasezona];
         try {
@@ -198,6 +213,25 @@ module.exports = class Penal{
         natural join utakmica natural join natjecanje where idigrac = $1  and godinasezona = $2) as preciznost
         WHERE EXISTS(select idpenal from penal natural join dogadaj 
             natural join utakmica natural join natjecanje where idigrac = $1  and godinasezona = $2);` 
+        const values = [idigrac, godinasezona];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            console.log('dohvatiPreciznostPenalaIgracaZaSezonu')
+            throw err
+        }
+    }
+
+    static async dohvatiPostotakObranaPenalaZaSezonu(idigrac, godinasezona){
+        const sql = `select CAST ((select count(idpenal) from penal natural join dogadaj 
+        natural join utakmica natural join natjecanje where zabijengol = 0
+         and idgolman = $1  and godinasezona = $2)  AS DOUBLE PRECISION)
+        / (select count(idpenal) from penal natural join dogadaj 
+        natural join utakmica natural join natjecanje where idgolman = $1  and godinasezona = $2) as preciznost
+        WHERE EXISTS(select idpenal from penal natural join dogadaj 
+            natural join utakmica natural join natjecanje where idgolman = $1  and godinasezona = $2);` 
         const values = [idigrac, godinasezona];
         try {
             const result = await db.query(sql, values);
