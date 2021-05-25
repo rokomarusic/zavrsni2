@@ -75,4 +75,133 @@ module.exports = class Korner{
         }
     }
 
+    static async dohvatiStativeNaKorneru(idigrac){
+        const sql = `select stativa, zabijengol, count(idkorner) from korner natural join dogadaj 
+        group by stativa, zabijengol, idigrac
+        having idigrac = $1
+        order by stativa` 
+        const values = [idigrac];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiIzborenDrugiKornerNaKorneru(idigrac){
+        const sql = `select izborendrugikorner, zabijengol, count(idkorner) from korner natural join dogadaj
+        group by izborendrugikorner, zabijengol, idigrac
+        having idigrac = $1
+        order by izborendrugikorner` 
+        const values = [idigrac];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiGolmanIzletioNaKorneru(idigrac){
+        const sql = `select golmanizletio, zabijengol, count(idkorner) from korner natural join dogadaj
+        group by golmanizletio, zabijengol, idigrac
+        having idigrac = $1
+        order by golmanizletio` 
+        const values = [idigrac];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiPreciznostKorneraIgraca(idigrac){
+        const sql = `select CAST ((select count(idkorner) from korner natural join dogadaj where zabijengol = 1
+         and idigrac = $1)  AS DOUBLE PRECISION)
+        / (select count(idkorner) from korner natural join dogadaj where idigrac = $1) as preciznost
+        WHERE EXISTS(select idkorner from korner natural join dogadaj where idigrac = $1);` 
+        const values = [idigrac];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+
+    //za sezonu
+
+    static async dohvatiStativeNaKorneruZaSezonu(idigrac, godinasezona){
+        const sql = `select stativa, zabijengol, count(idkorner) from korner natural join dogadaj
+        natural join utakmica natural join natjecanje 
+        group by stativa, zabijengol, idigrac, godinasezona
+        having idigrac = $1 and godinasezona = $2
+        order by stativa` 
+        const values = [idigrac, godinasezona];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiIzborenDrugiKornerNaKorneruZaSezonu(idigrac, godinasezona){
+        const sql = `select izborendrugikorner, zabijengol, count(idkorner) from korner natural join dogadaj
+        natural join utakmica natural join natjecanje
+        group by izborendrugikorner, zabijengol, idigrac, godinasezona
+        having idigrac = $1  and godinasezona = $2
+        order by izborendrugikorner` 
+        const values = [idigrac, godinasezona];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiGolmanIzletioNaKorneruZaSezonu(idigrac, godinasezona){
+        const sql = `select golmanizletio, zabijengol, count(idkorner) from korner natural join dogadaj
+        natural join utakmica natural join natjecanje
+        group by golmanizletio, zabijengol, idigrac, godinasezona
+        having idigrac = $1  and godinasezona = $2
+        order by golmanizletio` 
+        const values = [idigrac, godinasezona];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiPreciznostKorneraIgracaZaSezonu(idigrac, godinasezona){
+        const sql = `select CAST ((select count(idkorner) from korner natural join dogadaj 
+        natural join utakmica natural join natjecanje where zabijengol = 1 and godinasezona = $2
+         and idigrac = $1)  AS DOUBLE PRECISION)
+        / (select count(idkorner) from korner natural join dogadaj 
+        natural join utakmica natural join natjecanje where idigrac = $1  and godinasezona = $2) as preciznost
+        WHERE EXISTS(select idkorner from korner natural join dogadaj 
+            natural join utakmica natural join natjecanje where idigrac = $1  and godinasezona = $2);` 
+        const values = [idigrac, godinasezona];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
 }

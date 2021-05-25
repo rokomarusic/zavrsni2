@@ -16,6 +16,7 @@ module.exports = class Igrac{
         this.datumodigra = dbIgrac.datumodigra;
         this.datumdoigra = dbIgrac.datumdoigra;
         this.brgolova = dbIgrac.count
+        this.brgolovakorner = dbIgrac.brgolovakorner
     }   
 
     static async dohvatiSveIgrace(){
@@ -216,10 +217,14 @@ module.exports = class Igrac{
     }
 
     static async dohvatiNajboljeStrijelce(){
-        const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija, (select count(*)from dogadaj 
-        where idigrac = igrac.idigrac and zabijengol = 1) 
+        const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija, (select count(*)from dogadaj
+        where idigrac = igrac.idigrac and zabijengol = 1), (select count(*)from dogadaj natural join korner
+        where idigrac = igrac.idigrac and zabijengol = 1) as brgolovakorner
         from igrac
-order by (select count(*) from dogadaj where idigrac = igrac.idigrac and zabijengol = 1) DESC LIMIT 50` 
+        WHERE  (select count(*)from dogadaj 
+        where idigrac = igrac.idigrac and zabijengol = 1) > 0
+order by (select count(*) from dogadaj where idigrac = igrac.idigrac and zabijengol = 1) - (select count(*)from dogadaj natural join korner
+        where idigrac = igrac.idigrac and zabijengol = 1) DESC LIMIT 50` 
         const values = [];
         var igraci = [];
         try {
@@ -238,6 +243,7 @@ order by (select count(*) from dogadaj where idigrac = igrac.idigrac and zabijen
         const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija, (select count(*)from dogadaj 
         natural join penal where idigrac = igrac.idigrac and zabijengol = 1) 
         from igrac
+        where (select count(*) from dogadaj natural join penal where idigrac = igrac.idigrac and zabijengol = 1) > 0
 order by (select count(*) from dogadaj natural join penal where idigrac = igrac.idigrac and zabijengol = 1) DESC LIMIT 50` 
         const values = [];
         var igraci = [];
@@ -255,8 +261,9 @@ order by (select count(*) from dogadaj natural join penal where idigrac = igrac.
 
     static async dohvatiNajboljeStrijelceSlobodnih(){
         const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija, (select count(*)from dogadaj 
-        natura join slobodanudarac where idigrac = igrac.idigrac and zabijengol = 1) 
+        natural join slobodanudarac where idigrac = igrac.idigrac and zabijengol = 1) 
         from igrac
+        where (select count(*) from dogadaj natural join slobodanudarac where idigrac = igrac.idigrac and zabijengol = 1) > 0
 order by (select count(*) from dogadaj natural join slobodanudarac where idigrac = igrac.idigrac and zabijengol = 1) DESC LIMIT 50` 
         const values = [];
         var igraci = [];
@@ -273,11 +280,15 @@ order by (select count(*) from dogadaj natural join slobodanudarac where idigrac
     }
 
     static async dohvatiNajboljeStrijelceUNatjecanju(idnatjecanje){
-        const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija,
-        (select count(*)from dogadaj natural join utakmica where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1)
+        const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija, (select count(*)from dogadaj natural join utakmica
+        where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1), (select count(*)from dogadaj natural join utakmica natural join korner
+        where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1) as brgolovakorner
         from igrac
-        order by (select count(*) from dogadaj natural join utakmica where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1)
-        DESC LIMIT 50` 
+        WHERE  (select count(*)from dogadaj natural join utakmica 
+        where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1) > 0
+        order by (select count(*) from dogadaj natural join utakmica  where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1) 
+        - (select count(*)from dogadaj natural join korner natural join utakmica 
+        where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1) DESC LIMIT 50` 
         const values = [idnatjecanje];
         var igraci = [];
         try {
@@ -296,6 +307,7 @@ order by (select count(*) from dogadaj natural join slobodanudarac where idigrac
         const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija,
         (select count(*)from dogadaj natural join penal natural join utakmica where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1)
         from igrac
+        where (select count(*) from dogadaj natural join penal natural join utakmica where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1) > 0
         order by (select count(*) from dogadaj natural join penal natural join utakmica where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1)
         DESC LIMIT 50` 
         const values = [idnatjecanje];
@@ -316,6 +328,7 @@ order by (select count(*) from dogadaj natural join slobodanudarac where idigrac
         const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija,
         (select count(*)from dogadaj natural join slobodanudarac natural join utakmica where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1)
         from igrac
+        where (select count(*) from dogadaj natural join slobodanudarac natural join utakmica where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1) > 0
         order by (select count(*) from dogadaj natural join slobodanudarac natural join utakmica where idigrac = igrac.idigrac and zabijengol = 1 and idnatjecanje = $1)
         DESC LIMIT 50` 
         const values = [idnatjecanje];
@@ -333,13 +346,17 @@ order by (select count(*) from dogadaj natural join slobodanudarac where idigrac
     }
 
     static async dohvatiNajboljeStrijelceUSezoni(godinasezona){
-        const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija,
-        (select count(*)from dogadaj natural join utakmica natural join natjecanje 
-         where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1)
+        const sql = `select idigrac, imeigrac, prezimeigrac, nadimakigrac, pozicija, (select count(*)from dogadaj natural join utakmica natural join natjecanje
+        where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1), (select count(*)from dogadaj natural join utakmica natural join korner 
+		natural join natjecanje																			
+        where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1) as brgolovakorner
         from igrac
-        order by (select count(*) from dogadaj natural join utakmica natural join natjecanje 
-                  where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1)
-        DESC LIMIT 50` 
+        WHERE  (select count(*)from dogadaj natural join utakmica  natural join natjecanje
+        where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1) > 0
+order by (select count(*) from dogadaj natural join utakmica natural join natjecanje
+		  where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1) 
+- (select count(*)from dogadaj natural join korner natural join utakmica natural join natjecanje
+        where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1) DESC LIMIT 50` 
         const values = [godinasezona];
         var igraci = [];
         try {
@@ -359,6 +376,8 @@ order by (select count(*) from dogadaj natural join slobodanudarac where idigrac
         (select count(*)from dogadaj natural join penal natural join utakmica natural join natjecanje 
          where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1)
         from igrac
+        where (select count(*) from dogadaj natural join penal natural join utakmica natural join natjecanje 
+        where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1) > 0
         order by (select count(*) from dogadaj natural join penal natural join utakmica natural join natjecanje 
                   where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1)
         DESC LIMIT 50` 
@@ -381,6 +400,8 @@ order by (select count(*) from dogadaj natural join slobodanudarac where idigrac
         (select count(*)from dogadaj natural join slobodanudarac natural join utakmica natural join natjecanje 
          where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1)
         from igrac
+        where (select count(*) from dogadaj natural join slobodanudarac natural join utakmica natural join natjecanje 
+        where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1) > 0
         order by (select count(*) from dogadaj natural join slobodanudarac natural join utakmica natural join natjecanje 
                   where idigrac = igrac.idigrac and zabijengol = 1 and godinasezona = $1)
         DESC LIMIT 50` 

@@ -8,11 +8,28 @@ module.exports = class Natjecanje{
         this.brojtimova = dbNatjecanje.brojtimova
         this.godinasezona = dbNatjecanje.godinasezona
         this.iddrzava = dbNatjecanje.iddrzava
+        this.nazivtim = dbNatjecanje.nazivtim
     }
 
     static async dohvatiNatjecanjaUDrzavi(iddrzava){
         const sql = `SELECT * FROM natjecanje  NATURAL JOIN sezona WHERE iddrzava = $1` 
         const values = [iddrzava];
+        var natjecanja = [];
+        try {
+            const result = await db.query(sql, values);
+            for(var i = 0; i < result.rows.length; i++){
+                natjecanja[i] = new Natjecanje(result.rows[i]);
+            }
+            return natjecanja;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiSvaNatjecanja(){
+        const sql = `SELECT * FROM natjecanje  NATURAL JOIN drzava NATURAL JOIN tim ORDER BY nazivnatjecanje` 
+        const values = [];
         var natjecanja = [];
         try {
             const result = await db.query(sql, values);
