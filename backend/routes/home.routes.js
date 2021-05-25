@@ -326,4 +326,19 @@ router.get('/postotakobranaslobodnisezona', async(req, res) => {
     res.send(data);
 })
 
+router.get('/goloviposezonama', async(req, res) => {
+    let data = await Igrac.dohvatiGolovePoSezonama(req.query.igrac)
+    res.send(data);
+})
+
+router.get('/drzavaroster/:id/', async(req, res) => {
+    let data = await Igrac.dohvatiRosterZaDrzavu(req.params.id, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/najboljistrijelcitima/:id/', async(req, res) => {
+    let data = await Igrac.dohvatiNajboljeStrijelceTimaUSezoni(req.params.id, req.query.sezona)
+    res.send(data);
+})
+
 module.exports = router

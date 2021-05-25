@@ -30,7 +30,8 @@ module.exports = class Klub{
     }
 
     static async dohvatiSveKlubove(){
-        const sql = `SELECT tim.nazivtim, klub.idklub, tim.idtim FROM klub NATURAL JOIN tim ORDER BY tim.nazivtim` 
+        const sql = `SELECT tim.nazivtim, klub.idklub, tim.idtim, grad.* FROM klub NATURAL JOIN tim NATURAL JOIN grad
+        JOIN drzava ON drzava.iddrzava = grad.iddrzava ORDER BY tim.nazivtim` 
         const values = [];
         var klubovi = [];
         try {
