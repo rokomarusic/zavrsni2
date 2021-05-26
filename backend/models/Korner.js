@@ -242,4 +242,41 @@ module.exports = class Korner{
         }
     }
 
+    static async dohvatiKornereKluba(idklub, idtim, godinasezona){
+        const sql = `select * from korner natural join dogadaj natural join
+         utakmica natural join natjecanje join igra_za_klub on dogadaj.idigrac = igra_za_klub.idigrac
+        where idklub = $1 and datumodigrazaklub <= datumutakmica
+         AND (datumdoigrazaklub >= datumutakmica OR datumdoigrazaklub IS NULL)
+        and(utakmica.iddomacin = $2 OR utakmica.idgost = $2)
+        and godinasezona = $3` 
+        const values = [idklub, idtim, godinasezona];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            console.log('dohvatiPreciznostPenalaIgracaZaSezonu')
+            throw err
+        }
+    }
+
+    static async dohvatiKornereDrzave(iddrzava, idtim, godinasezona){
+        const sql = `select * from korner natural join dogadaj natural join utakmica natural join natjecanje join igrac
+        on dogadaj.idigrac = igrac.idigrac
+        where igrac.iddrzava = $1 and datumodigrazadrzavu <= datumutakmica
+        AND (datumdoigrazadrzavu >= datumutakmica OR datumdoigrazadrzavu IS NULL)
+        and(utakmica.iddomacin = $2 OR utakmica.idgost = $2)
+        AND godinasezona = $3
+        ` 
+        const values = [iddrzava, idtim, godinasezona];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows
+        } catch (err) {
+            console.log(err);
+            console.log('dohvatiPreciznostPenalaIgracaZaSezonu')
+            throw err
+        }
+    }
+
 }

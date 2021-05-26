@@ -5,9 +5,11 @@ var Igrac = require('../models/Igrac')
 var Natjecanje = require('../models/Natjecanje')
 var Penal = require('../models/Penal')
 var Korner = require('../models/Korner');
+var Klub = require('../models/Klub');
 const Udarac = require('../models/Udarac');
 const SlobodanUdarac = require('../models/SlobodanUdarac');
 const { dohvatiPreciznostSlobodnihUdaracaIgraca } = require('../models/SlobodanUdarac');
+const bcrypt = require ('bcrypt');
 
 router.get('/logout', async(req, res, next) =>{
     req.session.user = undefined;
@@ -23,14 +25,39 @@ router.get('/logout', async(req, res, next) =>{
 });
 
 router.post('/login', async(req, res) => {
-    let check = await Admin.provjeriLogin(req.body.username, req.body.password);
+    const saltRounds = 10;
+    /*let password = 'lozinka123'
+    let password2 = 'nekalozinka'
+    let hash1 = '$2b$10$06rwaEfm9wFfR8tuo8Tr5OkMsuWlvnOGyFUDFFMtFjtWmGjpwppvq'
+    let hash2 = '$2b$10$X5xt0ZP833Cot0bOK/HpwuF9EWzLRUwRMujTlQtjtDEjf45Wf06XS'*/
+    /*bcrypt.genSalt(saltRounds, function(err, salt) {
+        bcrypt.hash(password2, salt, function(err, hash) {
+        console.log(hash);
+        });
+      });*/
+
+      hash = await Admin.provjeriLogin(req.body.username)
+
+      bcrypt.compare(req.body.password, hash, async function(err, result) {
+        if (result) {
+          console.log("It matches!")
+          user = await Admin.napraviLogin(req.body.username);
+          res.send(user);
+        }
+        else {
+          console.log("Invalid password!");
+          res.send(null)
+        }
+      });
+
+    /*let check = await Admin.provjeriLogin(req.body.username, req.body.password);
     if(check){
         user = await Admin.napraviLogin(req.body.username);
         req.session.user = user;
         res.send(user);
     }else{
         res.send(null);
-    }
+    }*/
 })
 
 router.get('/topstrijelci', async(req, res) => {
@@ -338,6 +365,66 @@ router.get('/drzavaroster/:id/', async(req, res) => {
 
 router.get('/najboljistrijelcitima/:id/', async(req, res) => {
     let data = await Igrac.dohvatiNajboljeStrijelceTimaUSezoni(req.params.id, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/penaliklub/:id/', async(req, res) => {
+    let data = await Penal.dohvatiPenaleKluba(req.query.idklub, req.params.id, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/penalidrzava/:id/', async(req, res) => {
+    let data = await Penal.dohvatiPenaleDrzave(req.query.iddrzava, req.params.id, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/korneriklub/:id/', async(req, res) => {
+    let data = await Korner.dohvatiKornereKluba(req.query.idklub, req.params.id, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/korneridrzava/:id/', async(req, res) => {
+    let data = await Korner.dohvatiKornereDrzave(req.query.iddrzava, req.params.id, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/udarciklub/:id/', async(req, res) => {
+    let data = await Udarac.dohvatiUdarceKluba(req.query.idklub, req.params.id, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/udarcidrzava/:id/', async(req, res) => {
+    let data = await Udarac.dohvatiUdarceDrzave(req.query.iddrzava, req.params.id, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/slobodniklub/:id/', async(req, res) => {
+    let data = await SlobodanUdarac.dohvatiSlobodneUdarceKluba(req.query.idklub, req.params.id, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/slobodnidrzava/:id/', async(req, res) => {
+    let data = await SlobodanUdarac.dohvatiSlobodneUdarceDrzave(req.query.iddrzava, req.params.id, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/goloviposezonamatim/:id/', async(req, res) => {
+    let data = await Klub.dohvatiGolovePoSezonamaTima(req.params.id)
+    res.send(data);
+})
+
+router.get('/brgolovadomasezona/:id/', async(req, res) => {
+    let data = await Klub.dohvatiBrGolovaDoma(req.params.id, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/brgolovagostsezona/:id/', async(req, res) => {
+    let data = await Klub.dohvatiBrGolovaUGostima(req.params.id, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/avgposjecenost/:id/', async(req, res) => {
+    let data = await Klub.dohvatiProsjecnuPosjecenost(req.params.id, req.query.sezona)
     res.send(data);
 })
 

@@ -130,6 +130,76 @@ module.exports = class Klub{
         }
     }
 
+    static async dohvatiKlubZaId(idtim){
+        const sql = `SELECT klub.*, grad.*, tim.nazivtim FROM klub NATURAL JOIN tim NATURAL JOIN grad JOIN DRZAVA 
+        ON grad.iddrzava = drzava.iddrzava WHERE tim.idtim=$1` 
+        const values = [idtim];
+        try {
+            let result = await db.query(sql, values);
+            return result.rows[0];
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiBrGolovaDoma(idtim, godinasezona){
+        const sql = `select sum(brgolovadomacin) from  utakmica
+         natural join natjecanje where iddomacin = $1 and godinasezona = $2` 
+        const values = [idtim, godinasezona];
+        try {
+            let result = await db.query(sql, values);
+            return result.rows[0];
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiBrGolovaUGostima(idtim, godinasezona){
+        const sql = `select sum(brgolovagost) from  utakmica
+         natural join natjecanje where idgost = $1 and godinasezona = $2` 
+        const values = [idtim, godinasezona];
+        try {
+            let result = await db.query(sql, values);
+            return result.rows[0];
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+
+    static async dohvatiProsjecnuPosjecenost(idtim, godinasezona){
+        const sql = `select avg(posjecenost) from utakmica natural join natjecanje
+        where iddomacin = $1 and godinasezona = $2` 
+        const values = [idtim, godinasezona];
+        try {
+            let result = await db.query(sql, values);
+            return result.rows[0];
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiGolovePoSezonamaTima(idtim){
+        const sql = `select godinasezona, max(coalesce((select sum(brgolovadomacin) FROM utakmica natural join natjecanje n1
+        WHERE iddomacin = $1 and n1.godinasezona = n2.godinasezona),0)) as sumdomaci, max(coalesce((select sum(brgolovagost) FROM utakmica natural join natjecanje n1
+        WHERE idgost = $1 and n1.godinasezona = n2.godinasezona),0)) as sumgosti FROM utakmica natural join natjecanje n2
+        GROUP BY godinasezona` 
+        const values = [idtim];
+        try {
+            let result = await db.query(sql, values);
+            return result.rows;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+
+
 
 
 }

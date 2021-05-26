@@ -97,4 +97,19 @@ module.exports = class Stadion{
             throw err
         }
     }
+
+    static async dohvatiNajcesciStadion(idtim){
+        const sql = `select distinct stadion.*, (select count(*) from utakmica where iddomacin = $1 and idstadion = stadion.idstadion)
+        from utakmica natural join stadion where iddomacin = $1
+        order by (select count(*) from utakmica where iddomacin = $1 and idstadion = stadion.idstadion) DESC LIMIT 1` 
+        const values = [idtim];
+        var stadioni = [];
+        try {
+            const result = await db.query(sql, values);
+            return result.rows[0]
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
 }
