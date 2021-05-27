@@ -4,8 +4,6 @@ const db = require('./db')
 const path = require('path');
 const pg = require('pg');
 const cors = require('cors');
-const session = require('express-session');
-const pgSession = require('connect-pg-simple')(session);
 
 const homeRouter = require('./routes/home.routes');
 const adminRouter = require('./routes/admin.routes');
@@ -24,13 +22,6 @@ app.use(
     })
   );
 
-app.use(session({
-    store: new pgSession({pool: db.pool}),
-    secret: "secret",
-    resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 604800000}
-}));
 
 
 app.use('/', homeRouter);

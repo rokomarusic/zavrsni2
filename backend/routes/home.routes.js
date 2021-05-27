@@ -6,6 +6,7 @@ var Natjecanje = require('../models/Natjecanje')
 var Penal = require('../models/Penal')
 var Korner = require('../models/Korner');
 var Klub = require('../models/Klub');
+var Stadion = require('../models/Stadion');
 const Udarac = require('../models/Udarac');
 const SlobodanUdarac = require('../models/SlobodanUdarac');
 const { dohvatiPreciznostSlobodnihUdaracaIgraca } = require('../models/SlobodanUdarac');
@@ -425,6 +426,11 @@ router.get('/brgolovagostsezona/:id/', async(req, res) => {
 
 router.get('/avgposjecenost/:id/', async(req, res) => {
     let data = await Klub.dohvatiProsjecnuPosjecenost(req.params.id, req.query.sezona)
+    res.send(data);
+})
+
+router.get('/stadiontim/:id/', async(req, res) => {
+    let data = await Stadion.dohvatiNajcesciStadion(req.params.id)
     res.send(data);
 })
 
