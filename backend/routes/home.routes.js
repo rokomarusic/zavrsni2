@@ -365,7 +365,12 @@ router.get('/drzavaroster/:id/', async(req, res) => {
 })
 
 router.get('/najboljistrijelcitima/:id/', async(req, res) => {
-    let data = await Igrac.dohvatiNajboljeStrijelceTimaUSezoni(req.params.id, req.query.sezona)
+    let data;
+    if(req.query.jeklub == 1){
+        data = await Igrac.dohvatiNajboljeStrijelceKlubaUSezoni(req.params.id, req.query.sezona)
+    }else{
+        data = await Igrac.dohvatiNajboljeStrijelceDrzaveUSezoni(req.params.id, req.query.sezona)
+    }
     res.send(data);
 })
 

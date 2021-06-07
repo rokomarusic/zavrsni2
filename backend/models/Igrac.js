@@ -236,13 +236,50 @@ module.exports = class Igrac{
         }
     }
 
-    static async dohvatiNajboljeStrijelceTimaUSezoni(idtim, godinasezona){
-        const sql = `select igrac.idigrac, igrac.imeigrac, igrac.prezimeigrac, igrac.pozicija, count(*) from dogadaj natural join utakmica natural join natjecanje join igrac
+    static async dohvatiNajboljeStrijelceDrzaveUSezoni(idtim, godinasezona){
+        const sql = `select igrac.idigrac, igrac.imeigrac, igrac.prezimeigrac, igrac.nadimakigrac,  igrac.pozicija, count(*) from dogadaj natural join utakmica natural join natjecanje join igrac
         on igrac.idigrac = dogadaj.idigrac
-        where (iddomacin = $1 OR idgost = $1) and godinasezona = $2 and zabijengol = 1
+        where ((idgost = $1) and godinasezona = $2 and zabijengol = 1
         and NOT EXISTS(select * from korner where korner.rednibrojuutakmici = dogadaj.rednibrojuutakmici AND
-                      korner.idutakmica = dogadaj.idutakmica)
-        group by igrac.idigrac, igrac.imeigrac, igrac.prezimeigrac, igrac.pozicija LIMIT 5` 
+                      korner.idutakmica = dogadaj.idutakmica) AND EXISTS
+					  (SELECT * FROM drzava natural join tim where idtim = utakmica.idgost AND iddrzava = igrac.iddrzava))
+					  OR
+		((iddomacin = $1) and godinasezona = $2 and zabijengol = 1
+        and NOT EXISTS(select * from korner where korner.rednibrojuutakmici = dogadaj.rednibrojuutakmici AND
+                      korner.idutakmica = dogadaj.idutakmica) AND EXISTS
+					  (SELECT * FROM drzava natural join tim where idtim = utakmica.iddomacin AND iddrzava = igrac.iddrzava))
+        group by igrac.idigrac, igrac.imeigrac, igrac.prezimeigrac, igrac.pozicija
+		ORDER BY count(*) DESC
+		LIMIT 5` 
+        const values = [idtim, godinasezona];
+        var igraci = [];
+        try {
+            const result = await db.query(sql, values);
+            for(var i = 0; i < result.rows.length; i++){
+                igraci[i] = new Igrac(result.rows[i]);
+            }
+            return igraci;
+        } catch (err) {
+            console.log(err);
+            throw err
+        }
+    }
+
+    static async dohvatiNajboljeStrijelceKlubaUSezoni(idtim, godinasezona){
+        const sql = `select igrac.idigrac, igrac.imeigrac, igrac.prezimeigrac, igrac.nadimakigrac, igrac.pozicija, count(*) from dogadaj natural join utakmica natural join natjecanje join igrac
+        on igrac.idigrac = dogadaj.idigrac
+        where ((idgost = $1) and godinasezona = $2 and zabijengol = 1
+        and NOT EXISTS(select * from korner where korner.rednibrojuutakmici = dogadaj.rednibrojuutakmici AND
+                      korner.idutakmica = dogadaj.idutakmica) AND EXISTS
+					  (SELECT * FROM igra_za_klub natural join klub where idtim = utakmica.idgost AND idigrac = igrac.idigrac))
+					  OR
+		((iddomacin = $1) and godinasezona = $2 and zabijengol = 1
+        and NOT EXISTS(select * from korner where korner.rednibrojuutakmici = dogadaj.rednibrojuutakmici AND
+                      korner.idutakmica = dogadaj.idutakmica) AND EXISTS
+					  (SELECT * FROM igra_za_klub natural join klub where idtim = utakmica.iddomacin AND idigrac = igrac.idigrac))
+        group by igrac.idigrac, igrac.imeigrac, igrac.prezimeigrac, igrac.pozicija
+		ORDER BY count(*) DESC
+		LIMIT 5` 
         const values = [idtim, godinasezona];
         var igraci = [];
         try {
@@ -462,8 +499,9 @@ order by (select count(*) from dogadaj natural join utakmica natural join natjec
 
     static async dohvatiGolovePoSezonama(idigrac){
         const sql = `select godinasezona, count (*) from dogadaj natural join utakmica
-         natural join natjecanje where zabijengol = 1 and idigrac = $1
-        GROUP BY godinasezona` 
+        natural join natjecanje where zabijengol = 1 and idigrac = $1 and
+        (rednibrojuutakmici, idutakmica) NOT IN (select rednibrojuutakmici, idutakmica from korner)
+       GROUP BY godinasezona` 
         const values = [idigrac];
         try {
             const result = await db.query(sql, values);
